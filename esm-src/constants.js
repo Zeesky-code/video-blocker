@@ -5,7 +5,8 @@
 // Storage configuration
 export const STORAGE = {
   KEY: 'vb_blocked_hashes_v1',
-  LOG_LEVEL_KEY: 'vb_log_level'
+  LOG_LEVEL_KEY: 'vb_log_level',
+  SETTINGS_KEY: 'vb_settings'
 };
 
 // Video processing configuration
@@ -18,8 +19,9 @@ export const VIDEO_PROCESSING = {
 };
 
 // Hash comparison configuration
-export const HASH_CONFIG = {
-  HAMMING_THRESHOLD: 12,         // Maximum Hamming distance for match
+// Using let instead of const to allow runtime modification of threshold
+export let HASH_CONFIG = {
+  HAMMING_THRESHOLD: 12,         // Maximum Hamming distance for match (modified by sensitivity setting)
   MIN_ONES_ZEROS: 4             // Minimum ones/zeros to avoid trivial hashes
 };
 

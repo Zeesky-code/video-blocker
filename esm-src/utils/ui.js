@@ -11,6 +11,25 @@ export class UIUtils {
   constructor(logger) {
     this.logger = logger.createCategoryLogger(LOG_CATEGORIES.UI);
     this.activeToast = null;
+    this.activeToasts = [];
+  }
+
+  /**
+   * Clear all active toasts
+   */
+  clearToasts() {
+    this.logger.debug('Clearing all active toasts');
+
+    // Hide any active toasts
+    this.activeToasts.forEach(toast => {
+      if (toast && toast.hideToast) {
+        toast.hideToast();
+      }
+    });
+
+    // Reset the array
+    this.activeToasts = [];
+    this.activeToast = null;
   }
 
   /**
@@ -54,6 +73,7 @@ export class UIUtils {
     }).showToast();
 
     this.activeToast = toast;
+    this.activeToasts.push(toast);
 
     return toast;
   }
@@ -63,7 +83,14 @@ export class UIUtils {
    */
   hideToast() {
     // Toastify handles its own cleanup
+    if (this.activeToast && this.activeToast.hideToast) {
+      this.activeToast.hideToast();
+    }
     this.activeToast = null;
+
+    // Remove from active toasts array
+    this.activeToasts = this.activeToasts.filter(toast =>
+      toast !== this.activeToast);
   }
 
   /**
@@ -219,7 +246,7 @@ export class UIUtils {
   }
 
   cleanup() {
-    this.hideToast();
+    this.clearToasts();
 
     // Remove all video overlays
     const overlays = document.querySelectorAll('.vb-video-overlay');

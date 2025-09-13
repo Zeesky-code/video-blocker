@@ -13,6 +13,7 @@ export class VideoBlocker {
     this.queue = queue;
     this.blockedHashes = new Set();
     this.processedVideos = new WeakSet();
+    this.showNotifications = true; // Default value, will be updated from settings
     this.stats = {
       videosBlocked: 0,
       hashesAdded: 0,
@@ -30,8 +31,26 @@ export class VideoBlocker {
     const hashes = await this.storageManager.getBlockedHashes();
     this.blockedHashes = new Set(hashes);
 
+    // Try to load settings
+    try {
+      const settingsKey = 'vb_settings';
+      const settings = await new Promise((resolve) => {
+        chrome.storage.local.get([settingsKey], (result) => {
+          resolve(result[settingsKey] || {});
+        });
+      });
+
+      if (settings && typeof settings.showNotifications === 'boolean') {
+        this.showNotifications = settings.showNotifications;
+        this.logger.debug('Notification setting loaded', { showNotifications: this.showNotifications });
+      }
+    } catch (error) {
+      this.logger.warn('Could not load notification settings', error);
+    }
+
     this.logger.info('Video blocker initialized', {
-      blockedHashCount: this.blockedHashes.size
+      blockedHashCount: this.blockedHashes.size,
+      showNotifications: this.showNotifications
     });
   }
 
@@ -53,11 +72,15 @@ export class VideoBlocker {
 
         // Show processing feedback
         uiUtils.addVideoFeedback(video, 'processing');
-        uiUtils.showToast(SUCCESS_MESSAGES.FINGERPRINTING, 'info');
+        if (this.showNotifications) {
+          uiUtils.showToast(SUCCESS_MESSAGES.FINGERPRINTING, 'info');
+        }
 
         // Show retry feedback if this takes longer
         let retryFeedbackTimeout = setTimeout(() => {
-          uiUtils.showToast(SUCCESS_MESSAGES.FINGERPRINTING_RETRY, 'info');
+          if (this.showNotifications) {
+            uiUtils.showToast(SUCCESS_MESSAGES.FINGERPRINTING_RETRY, 'info');
+          }
         }, 2000);
 
         // Compute video hash with retries
@@ -66,7 +89,9 @@ export class VideoBlocker {
 
         if (!hash) {
           this.logger.warn('Could not compute video hash - likely poster frame or loading screen');
-          uiUtils.showToast(ERROR_MESSAGES.VIDEO_POSTER_FRAME, 'warning');
+          if (this.showNotifications) {
+            uiUtils.showToast(ERROR_MESSAGES.VIDEO_POSTER_FRAME, 'warning');
+          }
           uiUtils.addVideoFeedback(video, 'error');
           return false;
         }
@@ -74,7 +99,9 @@ export class VideoBlocker {
         // Check if already blocked
         if (this.blockedHashes.has(hash)) {
           this.logger.info('Video hash already in blocked list');
-          uiUtils.showToast(SUCCESS_MESSAGES.VIDEO_ALREADY_BLOCKED, 'info');
+          if (this.showNotifications) {
+            uiUtils.showToast(SUCCESS_MESSAGES.VIDEO_ALREADY_BLOCKED, 'info');
+          }
           uiUtils.addVideoFeedback(video, 'blocked');
           return false;
         }
@@ -96,7 +123,9 @@ export class VideoBlocker {
           this.stats.videosBlocked++;
         }
 
-        uiUtils.showToast(SUCCESS_MESSAGES.VIDEO_BLOCKED, 'success');
+        if (this.showNotifications) {
+          uiUtils.showToast(SUCCESS_MESSAGES.VIDEO_BLOCKED, 'success');
+        }
         this.logger.info('Video blocked successfully', {
           hashPreview: hash.substring(0, 16) + '...',
           totalBlocked: this.blockedHashes.size
@@ -106,7 +135,9 @@ export class VideoBlocker {
 
       } catch (error) {
         this.logger.error('Failed to block video', error);
-        uiUtils.showToast(`Block failed: ${error.message}`, 'error');
+        if (this.showNotifications) {
+          uiUtils.showToast(`Block failed: ${error.message}`, 'error');
+        }
         uiUtils.addVideoFeedback(video, 'error');
         return false;
       } finally {
@@ -157,7 +188,9 @@ export class VideoBlocker {
 
           await uiUtils.hideArticle(article);
           uiUtils.addVideoFeedback(video, 'blocked');
-          uiUtils.showToast(SUCCESS_MESSAGES.AUTO_BLOCKED, 'success');
+          if (this.showNotifications) {
+            uiUtils.showToast(SUCCESS_MESSAGES.AUTO_BLOCKED, 'success');
+          }
 
           this.stats.videosBlocked++;
           this.stats.matchesFound++;
@@ -228,7 +261,8 @@ export class VideoBlocker {
   getStats() {
     return {
       ...this.stats,
-      totalBlockedHashes: this.blockedHashes.size
+      totalBlockedHashes: this.blockedHashes.size,
+      showNotifications: this.showNotifications
     };
   }
 
@@ -294,8 +328,26 @@ export class VideoBlocker {
   async refreshBlockedHashes() {
     const hashes = await this.storageManager.getBlockedHashes();
     this.blockedHashes = new Set(hashes);
+
+    // Refresh settings too
+    try {
+      const settingsKey = 'vb_settings';
+      const settings = await new Promise((resolve) => {
+        chrome.storage.local.get([settingsKey], (result) => {
+          resolve(result[settingsKey] || {});
+        });
+      });
+
+      if (settings && typeof settings.showNotifications === 'boolean') {
+        this.showNotifications = settings.showNotifications;
+      }
+    } catch (error) {
+      this.logger.warn('Could not refresh notification settings', error);
+    }
+
     this.logger.info('Blocked hashes refreshed', {
-      count: this.blockedHashes.size
+      count: this.blockedHashes.size,
+      showNotifications: this.showNotifications
     });
   }
 

@@ -16,6 +16,9 @@ export class VideoScanner {
     this.lastUrl = '';
     this.observer = null;
     this.scanTimeout = null;
+    this.settings = {
+      autoScan: true
+    };
     this.stats = {
       totalScans: 0,
       videosFound: 0,
@@ -78,6 +81,12 @@ export class VideoScanner {
     });
 
     this.logger.debug('Mutation observer set up');
+
+    // Only observe if autoScan is enabled
+    if (!this.settings.autoScan) {
+      this.pauseScanning();
+      this.logger.debug('Auto-scanning disabled by user settings');
+    }
   }
 
   /**
@@ -119,6 +128,11 @@ export class VideoScanner {
    * @private
    */
   scheduleInitialScan() {
+    if (!this.settings.autoScan) {
+      this.logger.debug('Initial scan skipped - auto-scanning disabled');
+      return;
+    }
+
     setTimeout(() => {
       this.scanAllVideos();
     }, TIMING.INITIAL_SCAN_DELAY_MS);
@@ -134,6 +148,12 @@ export class VideoScanner {
       clearTimeout(this.scanTimeout);
     }
 
+    // Skip if auto-scanning is disabled
+    if (!this.settings.autoScan) {
+      this.logger.debug('URL change scan skipped - auto-scanning disabled');
+      return;
+    }
+
     // Schedule new scan
     this.scanTimeout = setTimeout(() => {
       this.scanAllVideos();
@@ -147,6 +167,12 @@ export class VideoScanner {
   scheduleScan() {
     if (this.scanTimeout) {
       clearTimeout(this.scanTimeout);
+    }
+
+    // Skip if auto-scanning is disabled
+    if (!this.settings.autoScan) {
+      this.logger.debug('Scheduled scan skipped - auto-scanning disabled');
+      return;
     }
 
     this.scanTimeout = setTimeout(() => {
@@ -321,6 +347,26 @@ export class VideoScanner {
   setUtils(videoUtils, uiUtils) {
     this._videoUtils = videoUtils;
     this._uiUtils = uiUtils;
+  }
+
+  /**
+   * Set scanner settings
+   * @param {Object} settings - Scanner settings
+   */
+  setSettings(settings) {
+    this.settings = {
+      ...this.settings,
+      ...settings
+    };
+
+    this.logger.debug('Scanner settings updated', this.settings);
+
+    // Apply settings immediately
+    if (!this.settings.autoScan && !this.isPaused) {
+      this.pauseScanning();
+    } else if (this.settings.autoScan && this.isPaused) {
+      this.resumeScanning();
+    }
   }
 
   /**
