@@ -1,0 +1,24 @@
+{
+  "name": "twitter-video-blocker",
+  "version": "1.0.0",
+  "description": "Control+Click videos on Twitter/X to fingerprint and block matching videos in your feed.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch --mode development",
+    "build": "vite build",
+    "clean": "rm -rf dist",
+    "build:watch": "vite build --watch",
+    "rebuild": "npm run clean && npm run build",
+    "extension:reload": "echo 'Please reload the extension manually in Chrome Extensions page'"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "toastify-js": "^1.12.0"
+  }
+}
