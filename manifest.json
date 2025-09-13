@@ -1,0 +1,13 @@
+{
+"manifest_version": 3,
+"name": "Twitter Video Blocker (Click-to-Block)",
+"version": "1.0",
+"description": "Control+Click videos on Twitter/X to fingerprint and block matching videos in your feed.",
+"permissions": ["storage", "activeTab"],
+"content_scripts": [
+{
+"matches": ["*://twitter.com/*", "*://x.com/*"],
+"js": ["content.js"]
+}
+]
+}
