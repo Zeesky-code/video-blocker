@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitter Video Blocker - Ayarlar</title>
+    <link rel="stylesheet" href="options.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                </svg>
+                Twitter Video Blocker
+            </h1>
+            <p class="subtitle">Engellenmiş videolar ve istatistikler</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-button active" data-tab="stats">📊 İstatistikler</button>
+            <button class="tab-button" data-tab="blocked">🚫 Engellenmiş Videolar</button>
+            <button class="tab-button" data-tab="settings">⚙️ Ayarlar</button>
+        </div>
+
+        <!-- İstatistikler Sekmesi -->
+        <div class="tab-content active" id="stats-tab">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-content">
+                        <h3>Toplam Engellenmiş Video</h3>
+                        <span class="stat-number" id="total-blocked">0</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-content">
+                        <h3>Bu Hafta Engellenen</h3>
+                        <span class="stat-number" id="weekly-blocked">0</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🗓️</div>
+                    <div class="stat-content">
+                        <h3>Bugün Engellenen</h3>
+                        <span class="stat-number" id="daily-blocked">0</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">💾</div>
+                    <div class="stat-content">
+                        <h3>Depolama Kullanımı</h3>
+                        <span class="stat-number" id="storage-size">0 KB</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3>Son 7 Günlük Engellenme Grafiği</h3>
+                <canvas id="blockingChart" width="400" height="200"></canvas>
+            </div>
+
+            <div class="recent-activity">
+                <h3>Son Aktiviteler</h3>
+                <div id="recent-blocks" class="activity-list">
+                    <div class="activity-item placeholder">
+                        <span class="activity-icon">📺</span>
+                        <span class="activity-text">Henüz engellenmiş video bulunmuyor</span>
+                        <span class="activity-time">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Engellenmiş Videolar Sekmesi -->
+        <div class="tab-content" id="blocked-tab">
+            <div class="blocked-header">
+                <div class="blocked-info">
+                    <h3>Engellenmiş Video Listesi</h3>
+                    <p>Tıklayarak engellediğiniz videoların hash değerleri</p>
+                </div>
+                <div class="blocked-actions">
+                    <button id="export-btn" class="btn secondary">📁 Dışa Aktar</button>
+                    <button id="clear-all-btn" class="btn danger">🗑️ Tümünü Temizle</button>
+                </div>
+            </div>
+
+            <div class="search-container">
+                <input type="text" id="hash-search" placeholder="Hash ara..." class="search-input">
+                <div class="filter-options">
+                    <select id="date-filter">
+                        <option value="all">Tüm Tarihler</option>
+                        <option value="today">Bugün</option>
+                        <option value="week">Bu Hafta</option>
+                        <option value="month">Bu Ay</option>
+                    </select>
+                    <select id="sort-order">
+                        <option value="newest">En Yeni</option>
+                        <option value="oldest">En Eski</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="blocked-list" class="blocked-videos">
+                <div class="blocked-item placeholder">
+                    <div class="blocked-content">
+                        <span class="blocked-text">Henüz engellenmiş video bulunmuyor</span>
+                        <span class="blocked-subtitle">Video engellemek için Twitter/X'te Ctrl+Click kullanın</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pagination" id="pagination" style="display: none;">
+                <button id="prev-page" class="btn secondary">← Önceki</button>
+                <span id="page-info">Sayfa 1 / 1</span>
+                <button id="next-page" class="btn secondary">Sonraki →</button>
+            </div>
+        </div>
+
+        <!-- Ayarlar Sekmesi -->
+        <div class="tab-content" id="settings-tab">
+            <div class="settings-section">
+                <h3>🎯 Engelleme Ayarları</h3>
+                <div class="setting-item">
+                    <label></label>
+                        <input type="checkbox" id="auto-scan" checked>
+                        <span class="checkmark"></span>
+                        Otomatik Video Tarama
+                    </label>
+                    <p class="setting-description">Sayfa yüklendiğinde otomatik olarak videoları tara ve engelle</p>
+                </div>
+
+                <div class="setting-item">
+                    <label>
+                        <input type="range" id="sensitivity" min="8" max="16" value="12">
+                        <span class="range-label">Hassasiyet: <span id="sensitivity-value">12</span></span>
+                    </label>
+                    <p class="setting-description">Düşük değer = daha hassas (daha çok video engellenir)</p>
+                </div>
+
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="show-notifications" checked>
+                        <span class="checkmark"></span>
+                        Bildirimler Göster
+                    </label>
+                    <p class="setting-description">Video engellendiğinde ekranda bildirim göster</p>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>🔧 Gelişmiş Ayarlar</h3>
+                <div class="setting-item">
+                    <label>
+                        <select id="log-level">
+                            <option value="error">Sadece Hatalar</option>
+                            <option value="warn">Uyarılar ve Hatalar</option>
+                            <option value="info" selected>Bilgi, Uyarı ve Hatalar</option>
+                            <option value="debug">Tüm Loglar (Debug)</option>
+                        </select>
+                        <span class="select-label">Log Seviyesi</span>
+                    </label>
+                    <p class="setting-description">Geliştirici konsolu için log detay seviyesi</p>
+                </div>
+
+                <div class="setting-item">
+                    <label>
+                        <input type="number" id="max-retries" min="0" max="5" value="2">
+                        <span class="number-label">Maksimum Yeniden Deneme</span>
+                    </label>
+                    <p class="setting-description">Video analizi başarısız olduğunda kaç kez yeniden denenecek</p>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>📊 Veri Yönetimi</h3>
+                <div class="setting-actions">
+                    <button id="backup-btn" class="btn secondary">💾 Veriyi Yedekle</button>
+                    <button id="restore-btn" class="btn secondary">📂 Veriyi Geri Yükle</button>
+                    <button id="reset-settings-btn" class="btn danger">🔄 Ayarları Sıfırla</button>
+                </div>
+                <input type="file" id="restore-file" accept=".json" style="display: none;">
+            </div>
+
+            <div class="settings-section">
+                <h3>ℹ️ Hakkında</h3>
+                <div class="about-info">
+                    <p><strong>Versiyon:</strong> <span id="version">1.0</span></p>
+                    <p><strong>Son Güncelleme:</strong> <span id="last-update">-</span></p>
+                    <p><strong>Geliştirici:</strong> Video Blocker Team</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="modal-title">Onay</h3>
+            <p id="modal-message">Bu işlemi gerçekleştirmek istediğinizden emin misiniz?</p>
+            <div class="modal-actions">
+                <button id="modal-cancel" class="btn secondary">İptal</button>
+                <button id="modal-confirm" class="btn danger">Onayla</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="options.js"></script>
+</body>
+</html>
