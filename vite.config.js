@@ -7,16 +7,17 @@ export default defineConfig({
 		outDir: "dist",
 		emptyOutDir: true,
 		rollupOptions: {
-			input: {
-				content: resolve(__dirname, "esm-src/content.js"),
-			},
+					input: {
+						content: resolve(__dirname, "esm-src/content.js"),
+						options: resolve(__dirname, "options/options.js"),
+					},
 			output: {
 				entryFileNames: "[name].js",
 				chunkFileNames: "[name].js",
 				assetFileNames: "[name].[ext]",
-				format: "iife", // Immediately Invoked Function Expression for browser compatibility
-				inlineDynamicImports: true, // Include Toastify CSS inline
-				manualChunks: undefined,
+			// format: "iife", // Removed for multi-entry compatibility
+			inlineDynamicImports: false, // Include Toastify CSS inline
+			manualChunks: undefined,
 			},
 			external: [],
 		},

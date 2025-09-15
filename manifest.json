@@ -9,16 +9,7 @@
     {
       "matches": ["*://twitter.com/*", "*://x.com/*"],
       "js": [
-        "src/utils/logger.js",
-        "src/constants.js",
-        "src/utils/storage.js",
-        "src/utils/hash.js",
-        "src/utils/video.js",
-        "src/utils/ui.js",
-        "src/core/queue.js",
-        "src/core/blocker.js",
-        "src/core/scanner.js",
-        "src/content.js"
+        "content.js"
       ]
     }
   ],
