@@ -58,25 +58,45 @@ Access the options page through your browser's extensions menu for:
 - Adjust sensitivity settings
 - Import/export your blocklist
 
-## 🧰 Architecture
-
-The extension is built with modern ES modules and organized into a clean, maintainable structure:
-
-```
 esm-src/
 ├── constants.js           # Configuration settings
 ├── content.js            # Main application coordinator
 ├── utils/                # Utility modules (logger, storage, UI, etc.)
 └── core/                 # Core functionality modules
+## 🧰 Architecture & Build
+
+This extension is built with modern ES modules and bundled using **Vite** for optimal performance and maintainability.
+
+**Source Structure:**
 ```
+esm-src/
+   constants.js           # Configuration settings
+   content.js             # Main application coordinator
+   utils/                 # Utility modules (logger, storage, UI, etc.)
+   core/                  # Core functionality modules
+options/                 # Options page HTML/CSS/JS
+public/                  # Extension icon and static assets
+vite.config.js           # Vite build configuration
+```
+
+**Build Output:**
+```
+dist/
+   content.js             # Bundled content script
+   options/               # Bundled options page
+   manifest.json          # Extension manifest (auto-copied)
+   icon.png, toastify.css # Assets
+```
+
+All code is written as ES modules and bundled for browser compatibility. No legacy JS or CommonJS remains.
 
 ## 🛠️ Development
 
+
 ### Available Scripts
 
-- `npm run dev` - Development build with hot reload
-- `npm run build` - Production build
-- `npm run clean` - Clean build directory
+- `npm run dev`   — Development build with hot reload (Vite)
+- `npm run build` — Production build (bundles to `dist/`)
 
 ### Debug Console
 
@@ -120,7 +140,7 @@ __videoBlockerDebug.testToastOffset(50, 100);
 
 ### Browser Compatibility
 
-- Chrome 88+ (Manifest V3)
+- Chrome 88+ (Manifest V3, ES modules via Vite bundle)
 - Microsoft Edge 88+
 - Other Chromium-based browsers
 - Firefox (with minor adaptations)
@@ -143,5 +163,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🙏 Acknowledgments
 
 - [Toastify-js](https://github.com/apvarun/toastify-js) for toast notifications
-- Built with Vite for modern, efficient bundling
+- Built with [Vite](https://vitejs.dev/) for modern, efficient bundling
 - Uses perceptual hashing techniques inspired by image similarity detection
